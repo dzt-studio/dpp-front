@@ -1,0 +1,189 @@
+<template>
+  <div>
+    <h4 style="margin-left: 2%">
+      {{ form.jobName }}
+    </h4>
+    <div style="margin-left: 2%;margin-top: 3%;border: solid 1px #d7d1d1;width: 95%;">
+      <el-button type="primary" size="small" class="sql-btn" @click="formaterSql (form.flinkSql)">格式化</el-button>
+      <el-button type="primary" size="small" class="sql-btn" @click="verifySql">语义校验</el-button>
+    </div>
+    <div style="width: 70%;margin-left: 2%;float:left;border-top: solid 1px #d7d1d1;border-right:solid 1px #d7d1d1;">
+      <SqlEditor
+        ref="sqleditor"
+        style=""
+        :value="form.flinkSql"
+        @changeTextarea="changeTextarea($event)"
+      />
+    </div>
+    <div style="width: 25%;float:left;">
+      <el-form ref="form" :rules="rules" :model="form" label-width="25%" style="border: solid 1px #d7d1d1;height: 652px">
+        <el-badge>运行参数</el-badge>
+        <el-form-item label="容器配额" prop="containerId">
+          <el-select v-model="form.containerMsg" placeholder="请选择容器配额" @focus="getContainerList">
+            <el-option v-for="item in containers" :key="item.containerMsg" :value="item.containerId" :label="item.containerMsg">
+              <li @click="changeFv(item)">
+                <span>{{item.containerMsg}}</span>
+              </li>
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="最大并行数" prop="parallelism">
+          <el-input-number v-model="form.parallelism" />
+        </el-form-item>
+        <el-form-item label="开启Checkpoint" prop="checkpointEnable">
+          <el-switch v-model="form.checkpointEnable" />
+        </el-form-item>
+        <el-form-item v-if="form.checkpointEnable===true" label="Checkpoint时间间隔" prop="checkpointInterval">
+          <el-input-number v-model="form.checkpointInterval" />
+        </el-form-item>
+        <el-form-item label="失败重启次数" prop="restartStrategyCount">
+          <el-input-number v-model="form.restartStrategyCount" />
+        </el-form-item>
+        <el-form-item label="失败重启时间间隔" prop="restartStrategyTime">
+          <el-input-number v-model="form.restartStrategyTime" />
+        </el-form-item>
+        <el-form-item label="开启任务调度" prop="enableSchedule">
+          <el-switch v-model="form.enableSchedule" />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="onSubmit">运行</el-button>
+          <el-button @click="onSave">保存</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
+    <div style="margin-left: 2%;">
+      <textarea v-model="verifyForm.verifyInfo" disabled style="color: red;width: 97%;height: 140px;outline:none;resize:none;" />
+    </div>
+  </div>
+</template>
+<script>
+import { format } from 'sql-formatter'
+import SqlEditor from '@/views/form/sqlEditer'
+import { createJob, getJob, containerList, commitJob, verifySql } from '@/api/job'
+import { containerListNotPage } from '@/api/container'
+
+export default {
+  components: {
+    SqlEditor
+  },
+  data() {
+    return {
+      verifyForm: {
+        verifyInfo: ''
+      },
+      jobName:{jobName:this.$route.params.jobName},
+      form: {
+        jobName: '',
+        containerId: '',
+        containerMsg: '',
+        parallelism: '',
+        checkpointEnable: false,
+        checkpointInterval: '',
+        restartStrategyCount: '',
+        restartStrategyTime: '',
+        flinkSql: '',
+        enableSchedule: false,
+        fv: ''
+      },
+      containers: null,
+      rules: {
+        containerId: [{ required: true, message: '容器不能为空', trigger: 'change' }],
+        parallelism: [{ required: true, message: '并行数不能为空', trigger: 'change' }],
+        checkpointEnable: [{ required: true, message: '并行数不能为空', trigger: 'change' }],
+        checkpointInterval: [{ required: true, message: '并行数不能为空', trigger: 'change' }],
+        restartStrategyCount: [{ required: true, message: '并行数不能为空', trigger: 'change' }],
+        restartStrategyTime: [{ required: true, message: '并行数不能为空', trigger: 'change' }],
+        sqlDetails: [{ required: true, message: '并行数不能为空', trigger: 'change' }]
+      }
+    }
+  },
+  created() {
+    // eslint-disable-next-line no-undef
+    getJob(this.jobName).then(response => {
+      this.dialogFormVisible = false
+      const dom = this.$refs.sqleditor
+      this.form.jobName = response.content.jobName
+      dom.editor.setValue(format(response.content.flinkSql))
+      this.form.containerId = response.content.containerId
+      this.form.containerMsg = response.content.containerMsg
+      this.form.parallelism = response.content.parallelism
+      this.form.checkpointEnable = response.content.checkpointEnable
+      this.form.checkpointInterval = response.content.checkpointInterval
+      this.form.restartStrategyCount = response.content.restartStrategyCount
+      this.form.restartStrategyTime = response.content.restartStrategyTime
+      this.form.enableSchedule = response.content.enableSchedule
+      this.form.fv = response.content.fv
+    })
+  },
+  methods: {
+    changeTextarea(val) {
+      this.$set(this.form, 'flinkSql', val)
+    },
+    formaterSql(val) {
+      const dom = this.$refs.sqleditor
+      dom.editor.setValue(format(dom.editor.getValue()))
+    },
+    onSubmit() {
+      this.$refs['form'].validate((valid) => {
+        if (valid) {
+          verifySql(this.form).then(response => {
+            this.verifyForm.verifyInfo = response.content
+            if (response.content === '校验成功') {
+              createJob(this.form).then(response => {
+                this.dialogFormVisible = false
+                this.$notify({
+                  message: response.message,
+                  duration: response.code
+                })
+                if (response.code === 200) {
+                  const parm = {
+                    'jobName': this.form.jobName
+                  }
+                  commitJob(parm).then(response => {
+                    this.dialogFormVisible = false
+                    this.$notify({
+                      message: response.message,
+                      duration: response.code
+                    })
+                   this.$router.push({ name: 'flinkJob' })
+                  })
+                }
+              })
+            }
+          })
+        }
+      })
+    },
+    onSave() {
+      this.$refs['form'].validate((valid) => {
+        if (valid) {
+          createJob(this.form).then(() => {
+            this.dialogFormVisible = false
+            this.$notify({
+              title: 'Success',
+              message: 'Created Successfully',
+              type: 'success',
+              duration: 2000
+            })
+          })
+        }
+      })
+    },
+    verifySql() {
+      verifySql(this.form).then(response => {
+        this.verifyForm.verifyInfo = response.content
+      })
+    },
+    getContainerList() {
+      containerListNotPage().then(response => {
+        this.containers = response.content
+      })
+    },
+    changeFv(item) {
+      this.form.containerId = item.containerId
+      this.form.containerMsg = item.containerMsg
+      this.form.fv = item.containerVersion
+    }
+  }
+}
+</script>
