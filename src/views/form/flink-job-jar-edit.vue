@@ -9,14 +9,13 @@
           <el-select v-model="form.containerMsg" placeholder="请选择容器配额" @focus="getContainerList">
             <el-option v-for="item in containers" :key="item.containerMsg" :value="item.containerId" :label="item.containerMsg">
               <li @click="changeFv(item)">
-                <span>{{item.containerMsg}}</span>
+                <span>{{ item.containerMsg }}</span>
               </li>
             </el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="flink版本" prop="fv" style="margin-top: 2%">
-          <el-badge v-model="form.fv">
-          </el-badge>
+          <el-badge v-model="form.fv" />
         </el-form-item>
         <el-form-item label="应用程序" prop="jarName">
           <el-select v-model="form.jarName" placeholder="请选择应用程序" @focus="getAppJarList">
@@ -39,8 +38,11 @@
           <el-switch v-model="form.enableSchedule" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="onSubmit">运行</el-button>
-          <el-button @click="onSave">保存</el-button>
+          <el-button v-if="form.jobStatus!=='RUNNING'" size="mini" type="primary" @click="onSubmit">运行</el-button>
+          <el-button v-if="form.jobStatus==='RUNNING'" size="mini" type="danger" @click="jobCancel(form.jobId)">
+            停止
+          </el-button>
+          <el-button size="mini" @click="onSave">保存</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -53,9 +55,9 @@
   }
 </style>
 <script>
-import sqlFormatter from 'sql-formatter'
-import { uploadJob, getJob, appJarList, saveJarApp, jobCommitWithJar, containerVList } from '@/api/job'
+import { uploadJob, getJob, appJarList, saveJarApp, jobCommitWithJar, jobCancel } from '@/api/job'
 import { containerListNotPage } from '@/api/container'
+import { hideLoading, showLoading } from '@/utils/loading'
 export default {
   data() {
     return {
@@ -64,7 +66,9 @@ export default {
         verifyInfo: ''
       },
       form: {
+        jobId: '',
         jobName: this.$route.params.jobName,
+        jobStatus: '',
         appParams: '',
         containerId: '',
         fv: '',
@@ -87,10 +91,12 @@ export default {
     // eslint-disable-next-line no-undef
     getJob(this.form).then(response => {
       this.dialogFormVisible = false
+      this.form.jobId = response.content.jobId
       this.form.containerId = response.content.containerId
       this.form.containerMsg = response.content.containerMsg
       this.form.appParams = response.content.appParams
       this.form.jarName = response.content.jarName
+      this.form.jobStatus = response.content.jobStatus
       this.form.appMainClass = response.content.mainClass
       this.form.enableSchedule = response.content.enableSchedule
       this.form.fv = response.content.fv
@@ -109,10 +115,6 @@ export default {
     },
     changeTextarea(val) {
       this.$set(this.form, 'flinkSql', val)
-    },
-    formaterSql(val) {
-      const dom = this.$refs.sqleditor
-      dom.editor.setValue(sqlFormatter.format(dom.editor.getValue()))
     },
     onSubmit() {
       this.$refs['form'].validate((valid) => {
@@ -191,6 +193,32 @@ export default {
       appJarList().then(response => {
         this.appJars = response.content
       })
+    },
+    jobCancel(jobId) {
+      this.$confirm('确定要停止该任务么?', '警告', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async() => {
+        const parms = {
+          'jobId': jobId
+        }
+        showLoading()
+        jobCancel(parms).then(response => {
+          getJob(this.jobName).then(response => {
+            hideLoading()
+            this.form.containerId = response.content.containerId
+            this.form.containerMsg = response.content.containerMsg
+            this.form.appParams = response.content.appParams
+            this.form.jarName = response.content.jarName
+            this.form.jobStatus = response.content.jobStatus
+            this.form.appMainClass = response.content.mainClass
+            this.form.enableSchedule = response.content.enableSchedule
+            this.form.fv = response.content.fv
+          })
+        })
+      }
+      )
     }
   }
 }
