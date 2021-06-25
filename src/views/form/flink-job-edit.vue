@@ -16,13 +16,13 @@
       />
     </div>
     <div style="width: 25%;float:left;">
-      <el-form ref="form" :rules="rules" :model="form" label-width="25%" style="border: solid 1px #d7d1d1;height: 652px">
+      <el-form ref="form" :rules="rules" :model="form" label-width="30%" style="border: solid 1px #d7d1d1;height: 652px">
         <el-badge>运行参数</el-badge>
         <el-form-item label="容器配额" prop="containerId">
           <el-select v-model="form.containerMsg" placeholder="请选择容器配额" @focus="getContainerList">
             <el-option v-for="item in containers" :key="item.containerMsg" :value="item.containerId" :label="item.containerMsg">
               <li @click="changeFv(item)">
-                <span>{{item.containerMsg}}</span>
+                <span>{{ item.containerMsg }}</span>
               </li>
             </el-option>
           </el-select>
@@ -46,8 +46,11 @@
           <el-switch v-model="form.enableSchedule" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="onSubmit">运行</el-button>
-          <el-button @click="onSave">保存</el-button>
+          <el-button v-if="form.jobStatus!=='RUNNING'" size="mini" type="primary" @click="onSubmit">运行</el-button>
+          <el-button v-if="form.jobStatus==='RUNNING'" size="mini" type="danger" @click="jobCancel(form.jobId)">
+            停止
+          </el-button>
+          <el-button size="mini" @click="onSave">保存</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -59,8 +62,9 @@
 <script>
 import { format } from 'sql-formatter'
 import SqlEditor from '@/views/form/sqlEditer'
-import { createJob, getJob, containerList, commitJob, verifySql } from '@/api/job'
+import { createJob, getJob, containerList, commitJob, verifySql, jobCancel } from '@/api/job'
 import { containerListNotPage } from '@/api/container'
+import { showLoading, hideLoading } from '@/utils/loading'
 
 export default {
   components: {
@@ -71,9 +75,11 @@ export default {
       verifyForm: {
         verifyInfo: ''
       },
-      jobName:{jobName:this.$route.params.jobName},
+      jobName: { jobName: this.$route.params.jobName },
       form: {
+        jobId: '',
         jobName: '',
+        jobStatus: '',
         containerId: '',
         containerMsg: '',
         parallelism: '',
@@ -102,7 +108,9 @@ export default {
     getJob(this.jobName).then(response => {
       this.dialogFormVisible = false
       const dom = this.$refs.sqleditor
+      this.form.jobId = response.content.jobId
       this.form.jobName = response.content.jobName
+      this.form.jobStatus = response.content.jobStatus
       dom.editor.setValue(format(response.content.flinkSql))
       this.form.containerId = response.content.containerId
       this.form.containerMsg = response.content.containerMsg
@@ -132,8 +140,10 @@ export default {
               createJob(this.form).then(response => {
                 this.dialogFormVisible = false
                 this.$notify({
-                  message: response.message,
-                  duration: response.code
+                  title: 'Success',
+                  message: 'Created Successfully',
+                  type: 'success',
+                  duration: 2000
                 })
                 if (response.code === 200) {
                   const parm = {
@@ -142,10 +152,12 @@ export default {
                   commitJob(parm).then(response => {
                     this.dialogFormVisible = false
                     this.$notify({
-                      message: response.message,
-                      duration: response.code
+                      title: 'Success',
+                      message: 'Created Successfully',
+                      type: 'success',
+                      duration: 2000
                     })
-                   this.$router.push({ name: 'flinkJob' })
+                    this.$router.push({ name: 'flinkJob' })
                   })
                 }
               })
@@ -178,6 +190,39 @@ export default {
       containerListNotPage().then(response => {
         this.containers = response.content
       })
+    },
+    jobCancel(jobId) {
+      this.$confirm('确定要停止该任务么?', '警告', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async() => {
+        const parms = {
+          'jobId': jobId
+        }
+        showLoading()
+        jobCancel(parms).then(response => {
+          getJob(this.jobName).then(response => {
+            hideLoading()
+            this.dialogFormVisible = false
+            const dom = this.$refs.sqleditor
+            this.form.jobId = response.content.jobId
+            this.form.jobName = response.content.jobName
+            this.form.jobStatus = response.content.jobStatus
+            dom.editor.setValue(format(response.content.flinkSql))
+            this.form.containerId = response.content.containerId
+            this.form.containerMsg = response.content.containerMsg
+            this.form.parallelism = response.content.parallelism
+            this.form.checkpointEnable = response.content.checkpointEnable
+            this.form.checkpointInterval = response.content.checkpointInterval
+            this.form.restartStrategyCount = response.content.restartStrategyCount
+            this.form.restartStrategyTime = response.content.restartStrategyTime
+            this.form.enableSchedule = response.content.enableSchedule
+            this.form.fv = response.content.fv
+          })
+        })
+      }
+      )
     },
     changeFv(item) {
       this.form.containerId = item.containerId

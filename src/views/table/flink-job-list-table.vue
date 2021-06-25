@@ -41,7 +41,7 @@
         min-width="50px"
       >
         <template slot-scope="{row}">
-          <span>{{ row.appId }}</span>
+          <span class="link-type" @click="linkFlinkUI(row)">{{ row.appId }}</span>
         </template>
       </el-table-column>
       <el-table-column label="名称" min-width="50px" align="center">
@@ -81,12 +81,17 @@
           <span>{{ row.runTime | formatDuring() }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="日志" min-width="50px" align="center">
+        <template slot-scope="{row}">
+          <span v-if="row.jobStatus!=='CREATE'" class="link-type" @click="jobLog(row)">log</span>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" min-width="55px" class-name="small-padding fixed-width">
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="row.jobType==='Flink Sql'?editUpdate(row):editJarUpdate(row)">
             编辑
           </el-button>
-          <el-button v-if="row.jobStatus!=='RUNNING' && row.appId!==null" size="mini" @click="row.jobType==='Flink Sql'?jobStrat(row):jobWithJarStrat(row)">
+          <el-button v-if="row.jobStatus!=='RUNNING' && row.appId!==null && row.jobStatus!=='BUILDING'" size="mini" @click="row.jobType==='Flink Sql'?jobStrat(row):jobWithJarStrat(row)">
             启动
           </el-button>
           <el-button v-if="row.jobStatus==='RUNNING'" size="mini" type="danger" @click="jobCancel(row)">
@@ -94,9 +99,6 @@
           </el-button>
           <el-button v-if="row.jobStatus!=='RUNNING'" size="mini" type="danger" @click="jobDel(row)">
             删除
-          </el-button>
-          <el-button v-if="row.jobStatus!=='CREATE'" size="mini" @click="jobLog(row)">
-            日志
           </el-button>
         </template>
       </el-table-column>
@@ -141,26 +143,20 @@
         </el-button>
       </div>
     </el-dialog>
-    <el-dialog title="日志" :visible.sync="dialogFormLog" style="width: 60%;margin-left: 20%">
+    <el-dialog title="日志" :visible.sync="dialogFormLog" style="width: 80%;margin-left: 15%">
       <el-form
         ref="logForm"
         label-position="left"
-        label-width="70px"
-        style="margin-right:50px;margin-left:50px"
       >
-        <textarea style="margin: 0px; width: 383px; height: 404px;" disabled="disabled" >{{ log.logInfo }}</textarea>
+        <textarea style="margin: 0px; width: 100%; height: 400px;resize:none" disabled="disabled">{{ log.logInfo }}</textarea>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormLog = false">
-          取消
-        </el-button>
-      </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { jobList, createJob, jobCancel, runJob, jobDel, runWithAppJob, jobLog } from '@/api/job'
+import { jobList, createJob, jobCancel, commitJob, jobDel, runWithAppJob, jobLog, appContainerInfo } from '@/api/job'
+import { showLoading, hideLoading } from '@/utils/loading'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 export default {
@@ -370,8 +366,7 @@ export default {
       const parms = {
         'jobName': row.jobName
       }
-      runJob(parms).then(response => {
-        response.data
+      commitJob(parms).then(response => {
         this.getList()
       })
     },
@@ -393,8 +388,9 @@ export default {
         const parms = {
           'jobId': row.id
         }
+        showLoading()
         jobCancel(parms).then(response => {
-          response.data
+          hideLoading()
           this.getList()
         })
       }
@@ -424,13 +420,21 @@ export default {
         this.temp.jobType = 'Flink Jar'
       }
     },
-    jobLog(row){
+    jobLog(row) {
       this.dialogFormLog = true
       const parms = {
         'jobId': row.id
       }
-      jobLog(parms).then(response =>{
+      jobLog(parms).then(response => {
         this.log.logInfo = response.content
+      })
+    },
+    linkFlinkUI(row) {
+      const parms = {
+        'appId': row.appId
+      }
+      appContainerInfo(parms).then(response => {
+        window.open(response.content + '/#/job/' + row.appId + '/overview', '_blank')
       })
     }
   }

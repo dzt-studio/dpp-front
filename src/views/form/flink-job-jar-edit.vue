@@ -54,7 +54,7 @@
 </style>
 <script>
 import sqlFormatter from 'sql-formatter'
-import { uploadJob, getJob, appJarList, saveJarApp, runWithAppJob, containerVList } from '@/api/job'
+import { uploadJob, getJob, appJarList, saveJarApp, jobCommitWithJar, containerVList } from '@/api/job'
 import { containerListNotPage } from '@/api/container'
 export default {
   data() {
@@ -87,13 +87,13 @@ export default {
     // eslint-disable-next-line no-undef
     getJob(this.form).then(response => {
       this.dialogFormVisible = false
-      this.form.containerId = response.data.containerId
-      this.form.containerMsg = response.data.containerMsg
-      this.form.appParams = response.data.appParams
-      this.form.jarName = response.data.jarName
-      this.form.appMainClass = response.data.mainClass
-      this.form.enableSchedule = response.data.enableSchedule
-      this.form.fv = response.data.fv
+      this.form.containerId = response.content.containerId
+      this.form.containerMsg = response.content.containerMsg
+      this.form.appParams = response.content.appParams
+      this.form.jarName = response.content.jarName
+      this.form.appMainClass = response.content.mainClass
+      this.form.enableSchedule = response.content.enableSchedule
+      this.form.fv = response.content.fv
     })
   },
   methods: {
@@ -120,26 +120,20 @@ export default {
           saveJarApp(this.form).then(response => {
             this.dialogFormVisible = false
             this.$notify({
-              type: response.data,
               message: response.message,
               duration: response.code
             })
-            if (response.code === 20000) {
+            if (response.code === 200) {
               const parm = {
                 'jobName': this.form.jobName
               }
-              runWithAppJob(parm).then(response => {
+              jobCommitWithJar(parm).then(response => {
                 this.dialogFormVisible = false
                 this.$notify({
-                  type: response.data,
                   message: response.message,
                   duration: response.code
                 })
-                if (response.data.backType) {
-                  this.$router.push({ name: 'flinkJob' })
-                } else {
-                  this.verifyForm.verifyInfo = response.data.content
-                }
+                this.$router.push({ name: 'flinkJob' })
               })
             }
           })

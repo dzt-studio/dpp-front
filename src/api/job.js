@@ -62,3 +62,31 @@ export function uploadJob(data) {
     data
   })
 }
+export function jobCancel(data) {
+  return request({
+    url: '/job/stop',
+    method: 'get',
+    params: data
+  })
+}
+export function appContainerInfo(data) {
+  return request({
+    url: '/job/app-container-info',
+    method: 'get',
+    params: data
+  })
+}
+export function jobCommitWithJar(data) {
+  return request({
+    url: '/job/job-commit-with-jar',
+    method: 'get',
+    params: data
+  })
+}
+export function saveJarApp(data) {
+  return request({
+    url: '/job/create-and-save-with-jar',
+    method: 'post',
+    data
+  })
+}
