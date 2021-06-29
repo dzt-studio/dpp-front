@@ -95,7 +95,7 @@ export const constantRoutes = [
       {
         path: 'schedule-job',
         name: 'scheduleJob',
-        // component: () => import('@/views/table/job-scheduled-table'),
+        component: () => import('@/views/table/job-scheduled-table'),
         meta: { title: '作业调度', icon: 'el-icon-timer' }
       }
     ]
