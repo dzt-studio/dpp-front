@@ -91,7 +91,7 @@
           <el-button type="primary" size="mini" @click="row.jobType==='Flink Sql'?editUpdate(row):editJarUpdate(row)">
             编辑
           </el-button>
-          <el-button v-if="row.jobStatus!=='RUNNING' && row.appId!==null && row.jobStatus!=='BUILDING'" size="mini" @click="row.jobType==='Flink Sql'?jobStrat(row):jobWithJarStrat(row)">
+          <el-button v-if="row.jobStatus!=='RUNNING' && row.appId!==null && row.jobStatus!=='BUILDING'" size="mini" @click="row.jobType==='Flink Sql'?jobStrat(row):jobCommitWithJar(row)">
             启动
           </el-button>
           <el-button v-if="row.jobStatus==='RUNNING'" size="mini" type="danger" @click="jobCancel(row)">
@@ -155,7 +155,17 @@
 </template>
 
 <script>
-import { jobList, createJob, jobCancel, commitJob, jobDel, runWithAppJob, jobLog, appContainerInfo } from '@/api/job'
+import {
+  jobList,
+  createJob,
+  jobCancel,
+  commitJob,
+  jobDel,
+  runWithAppJob,
+  jobLog,
+  appContainerInfo,
+  jobCommitWithJar
+} from '@/api/job'
 import { showLoading, hideLoading } from '@/utils/loading'
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -370,12 +380,11 @@ export default {
         this.getList()
       })
     },
-    jobWithJarStrat(row) {
+    jobCommitWithJar(row) {
       const parms = {
         'jobName': row.jobName
       }
-      runWithAppJob(parms).then(response => {
-        response.data
+      jobCommitWithJar(parms).then(response => {
         this.getList()
       })
     },
