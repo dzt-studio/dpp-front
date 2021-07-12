@@ -18,9 +18,9 @@
 
 
 ## 项目部署
-#### 1、首先确保有自建的hadoop-yarn相关环境。
+#### 1、首先确保服务器可访问自建的hadoop-yarn相关环境。
 
-#### 2、创建init.sh脚本：
+#### 2、执行init.sh脚本：
 ```bash
 #!/bin/bash
 sudo mkdir -p /data/flink/jar/jobs
@@ -61,10 +61,10 @@ services:
       JDBC_URL: jdbc:postgresql://localhost:5432/dpp_v2?user=postgres&password=123456&useUnicode=true&characterEncoding=utf-8&useSSL=true
       SERVER_PORT: 8083
 ```
-其中，DAPHOST相关配置必须是可以访问yarn集群环境的宿主机。其他配置可根据情况调整。
+其中，DAPHOST相关的环境变量为服务器22端口的鉴权信息。其他配置可根据情况调整。
 
 #### 4、初始化元数据信息
-到psql控制台中执行 create-ddl.sql脚本。
+到psql控制台中执行以下sql脚本。
 ```sql
 create extension "uuid-ossp";
 
