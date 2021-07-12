@@ -57,14 +57,14 @@ services:
     environment:
       POSTGRES_PASSWORD: 123456
   dpp-front:
-    image: dztstudio/dpp-front:dev-0.1.0     
+    image: dztstudio/dpp-front:dev-0.1.1     
     restart: always
     ports:
       - 9528:9528
     environment:
       VUE_APP_BASE_API: http://localhost:8083
   dpp-service:
-    image: dztstudio/dpp-service:dev-0.1.0
+    image: dztstudio/dpp-service:dev-0.1.1
     restart: always
     ports:
       - 8083:8083
