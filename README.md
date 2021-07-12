@@ -18,9 +18,9 @@
 
 
 ## 项目部署
-####1、首先确保有自建的hadoop-yarn相关环境。
+#### 1、首先确保有自建的hadoop-yarn相关环境。
 
-####2、创建init.sh脚本：
+#### 2、创建init.sh脚本：
 ```bash
 #!/bin/bash
 sudo mkdir -p /data/flink/jar/jobs
@@ -29,7 +29,7 @@ wget https://github.com/dzt-studio/dpp-service/raw/master/lib/dap-plug-1.0-SNAPS
 ```
 该脚本主要是创建指定目录，导入相关插件，后续不同的flink版本运行环境都要解压到data目录下面，如/data/flink-1.11.1。
 
-####3、运行docker-compose.yml脚本
+#### 3、运行docker-compose.yml脚本
 ```bash
 version: "3"
 
@@ -63,7 +63,7 @@ services:
 ```
 其中，DAPHOST相关配置必须是可以访问yarn集群环境的宿主机。其他配置可根据情况调整。
 
-####4、初始化元数据信息
+#### 4、初始化元数据信息
 到psql控制台中执行 create-ddl.sql脚本。
 ```sql
 create extension "uuid-ossp";
