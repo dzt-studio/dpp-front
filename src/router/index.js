@@ -62,7 +62,7 @@ export const constantRoutes = [
       path: 'container',
       name: '容器管理',
       component: () => import('@/views/table/container-list-table'),
-      meta: { title: '容器管理', icon: 'el-icon-s-help' }
+      meta: { title: '容器管理', icon: 'table' }
     }]
   },
   {
