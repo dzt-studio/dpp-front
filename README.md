@@ -243,10 +243,11 @@ insert into dpp_user (id, user_name, password, created_at, updated_at)
 values ('c7cb6921-b51f-4759-80cf-c1d766e8d01d','admin','123456','2021-06-21 08:44:33','2021-06-21 08:44:33'
 );
 ```
-然后访问http://localhost:9528 就可以了
+然后访问http://localhost:9528
 
 账号：admin  
 密码：123456
+DPP平台交流QQ群：739219754
 ![img.png](img.png)
 ![img_1.png](img_1.png)
 ![img_2.png](img_2.png)
