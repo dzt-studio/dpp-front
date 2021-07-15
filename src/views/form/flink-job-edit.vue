@@ -111,7 +111,7 @@ export default {
       this.form.jobId = response.content.jobId
       this.form.jobName = response.content.jobName
       this.form.jobStatus = response.content.jobStatus
-      dom.editor.setValue(format(response.content.flinkSql))
+      dom.editor.setValue(format(response.content.flinkSql, { language: 'plsql' }))
       this.form.containerId = response.content.containerId
       this.form.containerMsg = response.content.containerMsg
       this.form.parallelism = response.content.parallelism
@@ -129,7 +129,7 @@ export default {
     },
     formaterSql(val) {
       const dom = this.$refs.sqleditor
-      dom.editor.setValue(format(dom.editor.getValue()))
+      dom.editor.setValue(format(dom.editor.getValue(), { language: 'plsql' }))
     },
     onSubmit() {
       this.$refs['form'].validate((valid) => {
@@ -209,7 +209,7 @@ export default {
             this.form.jobId = response.content.jobId
             this.form.jobName = response.content.jobName
             this.form.jobStatus = response.content.jobStatus
-            dom.editor.setValue(format(response.content.flinkSql))
+            dom.editor.setValue(format(response.content.flinkSql, { language: 'plsql' }))
             this.form.containerId = response.content.containerId
             this.form.containerMsg = response.content.containerMsg
             this.form.parallelism = response.content.parallelism
