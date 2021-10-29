@@ -7,6 +7,13 @@ export function jobList(data) {
     data
   })
 }
+export function jobFilter(data) {
+  return request({
+    url: '/job/filter',
+    method: 'post',
+    data
+  })
+}
 export function getJob(data) {
   return request({
     url: '/job/info',
