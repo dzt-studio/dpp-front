@@ -86,7 +86,7 @@
           <span v-if="row.jobStatus!=='CREATE'" class="link-type" @click="jobLog(row)">log</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" min-width="55px" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" min-width="65px" class-name="small-padding fixed-width">
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="row.jobType==='Flink Sql'?editUpdate(row):editJarUpdate(row)">
             编辑

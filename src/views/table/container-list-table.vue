@@ -98,6 +98,13 @@
         <el-form-item label="appId" prop="containerId">
           <el-input v-model="temp.containerId" placeholder="请输入appId" />
         </el-form-item>
+        <el-form-item label="容器类型" prop="containerType">
+          <el-select v-model="temp.containerType" placeholder="请选择容器类型">
+            <li>
+              <span>yarn</span>
+            </li>
+          </el-select>
+        </el-form-item>
         <el-form-item label="容器名称" prop="containerName">
           <el-input v-model="temp.containerName" placeholder="请输入容器名称" />
         </el-form-item>
