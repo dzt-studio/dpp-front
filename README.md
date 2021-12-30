@@ -66,7 +66,7 @@ services:
       DAPHOST_PASSWORD: *****
       DAPHOST_PORT: 22
       DAPHOST_USER: root
-      JDBC_URL: jdbc:postgresql://*.*.*.*:5432/postgres?user=postgres&password=tslsmart123&useUnicode=true&characterEncoding=utf-8&useSSL=true
+      JDBC_URL: jdbc:postgresql://*.*.*.*:5432/postgres?user=postgres&password=123456&useUnicode=true&characterEncoding=utf-8&useSSL=true
     ports:
       - "8083:8083"
     networks:
