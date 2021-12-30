@@ -58,7 +58,7 @@ services:
            memory: 4G
 
   dpp-service:
-    image: dztstudio/dpp-service:dev-0.2.6
+    image: dztstudio/dpp-service:dev-0.3.5
     container_name: dpp-service
     restart: always
     environment:
@@ -79,7 +79,7 @@ services:
            memory: 4G
 
   dpp-front:
-    image: dztstudio/dpp-front:dev-0.2.5
+    image: dztstudio/dpp-front:dev-0.3.5
     container_name: dpp-front
     restart: always
     environment:
