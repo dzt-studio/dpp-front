@@ -34,3 +34,9 @@ export function containerListNotPage() {
     method: 'get'
   })
 }
+export function fvList() {
+  return request({
+    url: '/container/list-fv',
+    method: 'get'
+  })
+}

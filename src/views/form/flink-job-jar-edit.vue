@@ -4,15 +4,45 @@
       {{ form.jobName }}
     </h4>
     <div>
-      <el-form ref="form" :rules="rules" :model="form" label-width="150px" style="border: solid 1px #d7d1d1;height: 650px">
-        <el-form-item label="容器配额" prop="containerId" style="margin-top: 2%">
-          <el-select v-model="form.containerMsg" placeholder="请选择容器配额" @focus="getContainerList">
-            <el-option v-for="item in containers" :key="item.containerMsg" :value="item.containerId" :label="item.containerMsg">
-              <li @click="changeFv(item)">
-                <span>{{ item.containerMsg }}</span>
-              </li>
-            </el-option>
-          </el-select>
+      <el-form ref="form" :rules="rules" :model="form" label-width="150px" style="border: solid 1px #d7d1d1;">
+<!--        <el-form-item label="容器配额" prop="containerId" style="margin-top: 2%">-->
+<!--          <el-select v-model="form.containerMsg" placeholder="请选择容器配额" @focus="getContainerList">-->
+<!--            <el-option v-for="item in containers" :key="item.containerMsg" :value="item.containerId" :label="item.containerMsg">-->
+<!--              <li @click="changeFv(item)">-->
+<!--                <span>{{ item.containerMsg }}</span>-->
+<!--              </li>-->
+<!--            </el-option>-->
+<!--          </el-select>-->
+<!--        </el-form-item>-->
+        <el-form-item label="容器策略">
+          <el-tabs v-model="activeTab" @tab-click="tabClick">
+            <el-tab-pane label="共享队列" name="share">
+              <el-select v-model="form.containerMsg" placeholder="请选择容器配额" @focus="getContainerList">
+                <el-option v-for="item in containers" :key="item.containerMsg" :value="item.containerId" :label="item.containerMsg">
+                  <li @click="changeFv(item)">
+                    <span>{{ item.containerMsg }}</span>
+                  </li>
+                </el-option>
+              </el-select>
+            </el-tab-pane>
+            <el-tab-pane label="独享队列" name="alone">
+            </el-tab-pane>
+            <el-form-item v-if="activeTab=== 'alone'" prop="fv">
+              <el-select v-model="form.fv" placeholder="请选择Flink版本" @focus="getFvList">
+                <el-option v-for="item in fv" :key="item" :value="item" :label="item">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-tabs>
+        </el-form-item>
+        <el-form-item v-if="activeTab=== 'alone'" label="JM内存(Mb)" prop="jm">
+          <el-input-number v-model="form.jm" />
+        </el-form-item>
+        <el-form-item v-if="activeTab=== 'alone'" label="TM内存(Mb)" prop="tm">
+          <el-input-number v-model="form.tm" />
+        </el-form-item>
+        <el-form-item v-if="activeTab=== 'alone'" label="Slot数" prop="ys">
+          <el-input-number v-model="form.ys" />
         </el-form-item>
         <el-form-item label="flink版本" prop="fv" style="margin-top: 2%">
           <el-badge v-model="form.fv" />
@@ -56,7 +86,7 @@
 </style>
 <script>
 import { uploadJob, getJob, appJarList, saveJarApp, jobCommitWithJar, jobCancel } from '@/api/job'
-import { containerListNotPage } from '@/api/container'
+import { containerListNotPage, fvList } from '@/api/container'
 import { hideLoading, showLoading } from '@/utils/loading'
 export default {
   data() {
@@ -65,6 +95,7 @@ export default {
       verifyForm: {
         verifyInfo: ''
       },
+      activeTab: '',
       form: {
         jobId: '',
         jobName: this.$route.params.jobName,
@@ -75,10 +106,14 @@ export default {
         jarName: '',
         containerMsg: '',
         appMainClass: '',
-        enableSchedule: false
+        enableSchedule: false,
+        containerType: '',
+        jm: '',
+        tm: '',
+        ys: ''
       },
       containers: null,
-      fvs: null,
+      fv: null,
       appJars: null,
       rules: {
         containerId: [{ required: true, message: '容器不能为空', trigger: 'change' }],
@@ -100,6 +135,16 @@ export default {
       this.form.appMainClass = response.content.mainClass
       this.form.enableSchedule = response.content.enableSchedule
       this.form.fv = response.content.fv
+      if (response.content.containerType === 1) {
+        this.activeTab = 'share'
+        this.form.containerType = 1
+      } else {
+        this.activeTab = 'alone'
+        this.form.containerType = 2
+      }
+      this.form.jm = response.content.jm
+      this.form.tm = response.content.tm
+      this.form.ys = response.content.ys
     })
   },
   methods: {
@@ -219,6 +264,18 @@ export default {
         })
       }
       )
+    },
+    tabClick(tab, event) {
+      if (tab.$options.propsData.name === 'share') {
+        this.form.containerType = 1
+      } else {
+        this.form.containerType = 2
+      }
+    },
+    getFvList() {
+      fvList().then(response => {
+        this.fv = response.content
+      })
     }
   }
 }

@@ -66,6 +66,11 @@
           <span>{{ row.containerVersion }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="容器类型" min-width="50px" align="center">
+        <template slot-scope="{row}">
+          <span>{{ row.ctype }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" min-width="55px" class-name="small-padding fixed-width">
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="editUpdate(row)">
@@ -97,6 +102,10 @@
       >
         <el-form-item label="appId" prop="containerId">
           <el-input v-model="temp.containerId" placeholder="请输入appId" />
+        </el-form-item>
+        <el-form-item label="容器类型" prop="ctype">
+            <el-select v-model="temp.ctype" placeholder="请选择容器类型">
+              <el-option v-for="item in ctype" :key="item" :value="item" :label="item" /></el-select>
         </el-form-item>
         <el-form-item label="容器名称" prop="containerName">
           <el-input v-model="temp.containerName" placeholder="请输入容器名称" />
@@ -169,12 +178,14 @@ export default {
       // sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
       statusOptions: ['RUNNING', 'FINISHED', 'FAILED'],
       showReviewer: false,
+      ctype: ['yarn', 'docker'],
       temp: {
         containerId: '',
         containerName: '',
         containerMsg: '',
         containerUrl: '',
-        containerVersion: ''
+        containerVersion: '',
+        ctype: ''
       },
       scheduleJob: null,
       dialogFormVisible: false,
@@ -190,7 +201,8 @@ export default {
         containerName: [{ required: true, message: '容器名称不能为空', trigger: 'change' }],
         containerUrl: [{ required: true, message: '容器URL不能为空', trigger: 'change' }],
         containerVersion: [{ required: true, message: '容器版本不能为空', trigger: 'change' }],
-        containerMsg: [{ required: true, message: '容器描述不能为空', trigger: 'change' }]
+        containerMsg: [{ required: true, message: '容器描述不能为空', trigger: 'change' }],
+        ctype: [{ required: true, message: '请选择容器类型', trigger: 'change' }]
       },
       downloadLoading: false
     }

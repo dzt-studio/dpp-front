@@ -86,7 +86,7 @@
           <span v-if="row.jobStatus!=='CREATE'" class="link-type" @click="jobLog(row)">log</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" min-width="55px" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" min-width="65px" class-name="small-padding fixed-width">
         <template slot-scope="{row}">
           <el-button type="primary" size="mini" @click="row.jobType==='Flink Sql'?editUpdate(row):editJarUpdate(row)">
             编辑
@@ -157,6 +157,7 @@
 <script>
 import {
   jobList,
+  jobFilter,
   createJob,
   jobCancel,
   commitJob,
@@ -252,7 +253,9 @@ export default {
       total: 0,
       listQuery: {
         pageNum: 1,
-        pageSize: 10
+        pageSize: 10,
+        jobName: null,
+        jobStatus: null
       },
       activeTab: 'sql',
       importanceOptions: ['RUNNING', 'FINISHED', 'FAILED'],
@@ -298,8 +301,10 @@ export default {
       })
     },
     handleFilter() {
-      this.listQuery.pageNum = 1
-      this.getList()
+      jobFilter(this.listQuery).then(response => {
+        this.list = response.content.content
+        this.total = response.content.totalSize
+      })
     },
     handleModifyStatus(row, status) {
       this.$message({
