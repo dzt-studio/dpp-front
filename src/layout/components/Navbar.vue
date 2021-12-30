@@ -3,7 +3,7 @@
     <hamburger :is-active="sidebar.opened" class="hamburger-container" @toggleClick="toggleSideBar" />
     <breadcrumb class="breadcrumb-container" />
     <div class="right-menu">
-      <el-badge style="margin-right: 10px">version:0.3.0</el-badge>
+      <el-badge style="margin-right: 10px">version:0.3.5</el-badge>
       <el-dropdown class="avatar-container" trigger="click">
         <div class="avatar-wrapper">
           <img src="https://avatars.githubusercontent.com/u/84053867?s=60&v=4" class="user-avatar">
