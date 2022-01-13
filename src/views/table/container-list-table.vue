@@ -178,7 +178,7 @@ export default {
       // sortOptions: [{ label: 'ID Ascending', key: '+id' }, { label: 'ID Descending', key: '-id' }],
       statusOptions: ['RUNNING', 'FINISHED', 'FAILED'],
       showReviewer: false,
-      ctype: ['yarn', 'docker'],
+      ctype: ['yarn', 'docker', 'k8s'],
       temp: {
         containerId: '',
         containerName: '',
