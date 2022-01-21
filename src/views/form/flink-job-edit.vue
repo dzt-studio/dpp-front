@@ -97,7 +97,7 @@ import SqlEditor from '@/views/form/sqlEditer'
 import { createJob, getJob, commitJob, verifySql, jobCancel } from '@/api/job'
 import { containerListNotPage, fvList } from '@/api/container'
 import { showLoading, hideLoading } from '@/utils/loading'
-
+let Base64 = require('js-base64').Base64
 export default {
   components: {
     SqlEditor
@@ -160,7 +160,7 @@ export default {
       this.form.jobId = response.content.jobId
       this.form.jobName = response.content.jobName
       this.form.jobStatus = response.content.jobStatus
-      dom.editor.setValue(format(response.content.flinkSql, { language: 'plsql' }))
+      dom.editor.setValue(Base64.decode(format(response.content.flinkSql, {language: 'plsql'})))
       this.form.containerId = response.content.containerId
       this.form.containerMsg = response.content.containerMsg
       this.form.parallelism = response.content.parallelism
@@ -199,6 +199,7 @@ export default {
     onSubmit() {
       this.$refs['form'].validate((valid) => {
         if (valid) {
+          this.form.flinkSql = Base64.encode(this.form.flinkSql)
           verifySql(this.form).then(response => {
             this.verifyForm.verifyInfo = response.content
             if (response.content === '校验成功') {
@@ -234,6 +235,7 @@ export default {
     onSave() {
       this.$refs['form'].validate((valid) => {
         if (valid) {
+          this.form.flinkSql = Base64.encode(this.form.flinkSql)
           createJob(this.form).then(() => {
             this.dialogFormVisible = false
             this.$notify({
@@ -247,6 +249,7 @@ export default {
       })
     },
     verifySql() {
+      this.form.flinkSql = Base64.encode(this.form.flinkSql)
       verifySql(this.form).then(response => {
         this.verifyForm.verifyInfo = response.content
       })
@@ -279,7 +282,7 @@ export default {
             this.form.jobId = response.content.jobId
             this.form.jobName = response.content.jobName
             this.form.jobStatus = response.content.jobStatus
-            dom.editor.setValue(format(response.content.flinkSql, { language: 'plsql' }))
+            dom.editor.setValue(Base64.decode(format(response.content.flinkSql, {language: 'plsql'})))
             this.form.containerId = response.content.containerId
             this.form.containerMsg = response.content.containerMsg
             this.form.parallelism = response.content.parallelism
