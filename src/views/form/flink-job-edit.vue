@@ -74,7 +74,7 @@
         <el-form-item v-if="form.enableWarning === true && form.warnType === '钉钉'" label="tokenId" prop="dingTokenId">
           <el-input v-model="form.dingTokenId" />
         </el-form-item>
-        <el-form-item v-if="form.enableWarning === true && form.warnType === '邮件'" label="e-mail" prop="eMail">
+        <el-form-item v-if="form.enableWarning === true && form.warnType === '邮件'" label="e-mail" prop="emailAdd">
           <el-input v-model="form.emailAdd" />
         </el-form-item>
         <el-form-item>
@@ -97,7 +97,7 @@ import SqlEditor from '@/views/form/sqlEditer'
 import { createJob, getJob, commitJob, verifySql, jobCancel } from '@/api/job'
 import { containerListNotPage, fvList } from '@/api/container'
 import { showLoading, hideLoading } from '@/utils/loading'
-let Base64 = require('js-base64').Base64
+const Base64 = require('js-base64').Base64
 export default {
   components: {
     SqlEditor
@@ -148,7 +148,7 @@ export default {
         fv: [{ required: true, message: '请选择flink版本', trigger: 'change' }],
         warnType: [{ required: true, message: '请选择报警方式', trigger: 'change' }],
         dingTokenId: [{ required: true, message: 'TokenId不能为空', trigger: 'change' }],
-        eMail: [{ required: true, message: 'e-mail不能为空', trigger: 'change' }]
+        emailAdd: [{ required: true, message: 'e-mail不能为空', trigger: 'change' }]
       }
     }
   },
@@ -184,7 +184,7 @@ export default {
       if (this.form.enableWarning) {
         this.form.warnType = response.content.warnType
         this.form.dingTokenId = response.content.dingTokenId
-        this.form.eMail = response.content.eMail
+        this.form.emailAdd = response.content.emailAdd
       }
     })
   },
@@ -199,6 +199,7 @@ export default {
     onSubmit() {
       this.$refs['form'].validate((valid) => {
         if (valid) {
+          const temp = this.form.flinkSql
           this.form.flinkSql = Base64.encode(this.form.flinkSql)
           verifySql(this.form).then(response => {
             this.verifyForm.verifyInfo = response.content
@@ -229,12 +230,14 @@ export default {
               })
             }
           })
+          this.form.flinkSql = temp
         }
       })
     },
     onSave() {
       this.$refs['form'].validate((valid) => {
         if (valid) {
+          const temp = this.form.flinkSql
           this.form.flinkSql = Base64.encode(this.form.flinkSql)
           createJob(this.form).then(() => {
             this.dialogFormVisible = false
@@ -245,14 +248,17 @@ export default {
               duration: 2000
             })
           })
+          this.form.flinkSql = temp
         }
       })
     },
     verifySql() {
+      const temp = this.form.flinkSql
       this.form.flinkSql = Base64.encode(this.form.flinkSql)
       verifySql(this.form).then(response => {
         this.verifyForm.verifyInfo = response.content
       })
+      this.form.flinkSql = temp
     },
     getContainerList() {
       containerListNotPage().then(response => {

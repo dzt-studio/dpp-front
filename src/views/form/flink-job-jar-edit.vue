@@ -67,6 +67,19 @@
         <el-form-item label="开启任务调度" prop="enableSchedule">
           <el-switch v-model="form.enableSchedule" />
         </el-form-item>
+        <el-form-item label="开启任务报警" prop="enableWarning">
+          <el-switch v-model="form.enableWarning" />
+        </el-form-item>
+        <el-form-item v-if="form.enableWarning=== true" label="报警方式" prop="warnType">
+          <el-select v-model="form.warnType" placeholder="请选择报警类型">
+            <el-option v-for="item in warnType" :key="item" :value="item" :label="item" /></el-select>
+        </el-form-item>
+        <el-form-item v-if="form.enableWarning === true && form.warnType === '钉钉'" label="tokenId" prop="dingTokenId" style="width: 30%">
+          <el-input v-model="form.dingTokenId" />
+        </el-form-item>
+        <el-form-item v-if="form.enableWarning === true && form.warnType === '邮件'" label="e-mail" prop="emailAdd" style="width: 30%">
+          <el-input v-model="form.emailAdd" />
+        </el-form-item>
         <el-form-item>
           <el-button v-if="form.jobStatus!=='RUNNING'" size="mini" type="primary" @click="onSubmit">运行</el-button>
           <el-button v-if="form.jobStatus==='RUNNING'" size="mini" type="danger" @click="jobCancel(form.jobId)">
@@ -110,15 +123,23 @@ export default {
         containerType: '',
         jm: '',
         tm: '',
-        ys: ''
+        ys: '',
+        enableWarning: false,
+        warnType: '',
+        dingTokenId: '',
+        emailAdd: ''
       },
+      warnType: ['钉钉', '邮件'],
       containers: null,
       fv: null,
       appJars: null,
       rules: {
         containerId: [{ required: true, message: '容器不能为空', trigger: 'change' }],
         jarName: [{ required: true, message: '应用不能为空', trigger: 'change' }],
-        appMainClass: [{ required: true, message: '主类不能为空', trigger: 'change' }]
+        appMainClass: [{ required: true, message: '主类不能为空', trigger: 'change' }],
+        warnType: [{ required: true, message: '请选择报警方式', trigger: 'change' }],
+        dingTokenId: [{ required: true, message: 'TokenId不能为空', trigger: 'change' }],
+        emailAdd: [{ required: true, message: 'e-mail不能为空', trigger: 'change' }]
       }
     }
   },
@@ -145,6 +166,12 @@ export default {
       this.form.jm = response.content.jm
       this.form.tm = response.content.tm
       this.form.ys = response.content.ys
+      this.form.enableWarning = response.content.enableWarning
+      if (this.form.enableWarning) {
+        this.form.warnType = response.content.warnType
+        this.form.dingTokenId = response.content.dingTokenId
+        this.form.emailAdd = response.content.emailAdd
+      }
     })
   },
   methods: {
