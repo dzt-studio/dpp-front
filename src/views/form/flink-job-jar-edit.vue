@@ -47,6 +47,9 @@
         <el-form-item label="flink版本" prop="fv" style="margin-top: 2%">
           <el-badge v-model="form.fv" />
         </el-form-item>
+        <el-form-item label="容器类型" prop="ctype">
+          <el-badge v-model="form.ctype" />
+        </el-form-item>
         <el-form-item label="应用程序" prop="jarName">
           <el-select v-model="form.jarName" placeholder="请选择应用程序" @focus="getAppJarList">
             <el-option v-for="item in appJars" :key="item.id" :value="item.jarName" :label="item.jarName" />
@@ -98,7 +101,7 @@
   }
 </style>
 <script>
-import { uploadJob, getJob, appJarList, saveJarApp, jobCommitWithJar, jobCancel } from '@/api/job'
+import {uploadJob, getJob, appJarList, saveJarApp, jobCommitWithJar, jobCancel, appK8sJarList} from '@/api/job'
 import { containerListNotPage, fvList } from '@/api/container'
 import { hideLoading, showLoading } from '@/utils/loading'
 export default {
@@ -172,6 +175,7 @@ export default {
         this.form.dingTokenId = response.content.dingTokenId
         this.form.emailAdd = response.content.emailAdd
       }
+      this.form.ctype = response.content.ctype
     })
   },
   methods: {
@@ -219,6 +223,7 @@ export default {
         event.preventDefault()
         const formData = new FormData()
         formData.append('file', this.file)
+        formData.append('ctype', this.form.ctype)
         uploadJob(formData).then(() => {
           this.dialogFormVisible = false
           this.$notify({
@@ -260,9 +265,13 @@ export default {
       this.form.containerId = item.containerId
       this.form.containerMsg = item.containerMsg
       this.form.fv = item.containerVersion
+      this.form.ctype = item.ctype
     },
     getAppJarList() {
-      appJarList().then(response => {
+      const parms = {
+        'ctype': this.form.ctype
+      }
+      appJarList(parms).then(response => {
         this.appJars = response.content
       })
     },
@@ -287,6 +296,7 @@ export default {
             this.form.appMainClass = response.content.mainClass
             this.form.enableSchedule = response.content.enableSchedule
             this.form.fv = response.content.fv
+            this.form.ctype = response.content.ctype
           })
         })
       }

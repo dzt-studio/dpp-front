@@ -59,7 +59,8 @@ export function jobLog(data) {
 export function appJarList(data) {
   return request({
     url: '/job/app-jar-list',
-    method: 'get'
+    method: 'get',
+    params: data
   })
 }
 export function uploadJob(data) {
