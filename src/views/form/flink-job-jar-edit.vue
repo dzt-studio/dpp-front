@@ -35,6 +35,12 @@
             </el-form-item>
           </el-tabs>
         </el-form-item>
+        <el-form-item v-if="activeTab=== 'share'" label="Flink版本" prop="fv" style="margin-top: 2%">
+          <el-badge v-model="form.fv" />
+        </el-form-item>
+        <el-form-item v-if="activeTab=== 'share'" label="容器类型" prop="ctype">
+          <el-badge v-model="form.ctype" />
+        </el-form-item>
         <el-form-item v-if="activeTab=== 'alone'" label="JM内存(Mb)" prop="jm">
           <el-input-number v-model="form.jm" />
         </el-form-item>
@@ -43,12 +49,6 @@
         </el-form-item>
         <el-form-item v-if="activeTab=== 'alone'" label="Slot数" prop="ys">
           <el-input-number v-model="form.ys" />
-        </el-form-item>
-        <el-form-item label="flink版本" prop="fv" style="margin-top: 2%">
-          <el-badge v-model="form.fv" />
-        </el-form-item>
-        <el-form-item label="容器类型" prop="ctype">
-          <el-badge v-model="form.ctype" />
         </el-form-item>
         <el-form-item label="应用程序" prop="jarName">
           <el-select v-model="form.jarName" placeholder="请选择应用程序" @focus="getAppJarList">

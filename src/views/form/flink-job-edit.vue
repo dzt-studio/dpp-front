@@ -37,6 +37,12 @@
             <el-option v-for="item in fv" :key="item" :value="item" :label="item" />
           </el-select>
         </el-form-item>
+        <el-form-item v-if="activeTab=== 'share'" label="Flink版本" prop="fv" style="margin-top: 2%">
+          <el-badge v-model="form.fv" />
+        </el-form-item>
+        <el-form-item v-if="activeTab=== 'share'" label="容器类型" prop="ctype">
+          <el-badge v-model="form.ctype" />
+        </el-form-item>
         <el-form-item v-if="activeTab=== 'alone'" label="JM内存(Mb)" prop="jm">
           <el-input-number v-model="form.jm" />
         </el-form-item>
@@ -170,6 +176,7 @@ export default {
       this.form.restartStrategyTime = response.content.restartStrategyTime
       this.form.enableSchedule = response.content.enableSchedule
       this.form.fv = response.content.fv
+      this.form.ctype = response.content.ctype
       if (response.content.containerType === 1) {
         this.activeTab = 'share'
         this.form.containerType = 1
@@ -307,6 +314,7 @@ export default {
       this.form.containerId = item.containerId
       this.form.containerMsg = item.containerMsg
       this.form.fv = item.containerVersion
+      this.form.ctype = item.ctype
     },
     tabClick(tab, event) {
       if (tab.$options.propsData.name === 'share') {
