@@ -7,7 +7,7 @@
       <el-button type="primary" size="small" class="sql-btn" @click="formaterSql (form.flinkSql)">格式化</el-button>
       <el-button type="primary" size="small" class="sql-btn" @click="verifySql">语义校验</el-button>
     </div>
-    <div style="width: 70%;margin-left: 2%;float:left;border-top: solid 1px #d7d1d1;border-right:solid 1px #d7d1d1;">
+    <div style="width: 70%;margin-left: 2%;float:left;border-top: solid 1px #d7d1d1;border-right:solid 1px #d7d1d1;border-bottom:solid 1px #d7d1d1;">
       <SqlEditor
         ref="sqleditor"
         style=""
@@ -15,9 +15,9 @@
         @changeTextarea="changeTextarea($event)"
       />
     </div>
-    <div style="width: 25%;float:left;">
+    <div style="width: 25%;float:right; margin-right: 3%">
       <el-form ref="form" :rules="rules" :model="form" label-width="30%" style="border: solid 1px #d7d1d1;">
-        <el-badge>运行参数</el-badge>
+        <!--<el-badge>运行参数</el-badge>-->
         <el-form-item label="容器策略">
           <el-tabs v-model="activeTab" @tab-click="tabClick">
             <el-tab-pane label="共享队列" name="share">
@@ -92,8 +92,8 @@
         </el-form-item>
       </el-form>
     </div>
-    <div style="margin-left: 2%;">
-      <textarea v-model="verifyForm.verifyInfo" disabled style="color: red;width: 97%;height: 140px;outline:none;resize:none;" />
+    <div style="margin-left: 2%">
+      <textarea v-model="verifyForm.verifyInfo" disabled style="color: red;width: 71.4%;height: 140px;outline:none;resize:none" />
     </div>
   </div>
 </template>
