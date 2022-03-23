@@ -7,7 +7,7 @@
       <el-button type="primary" size="small" class="sql-btn" @click="formaterSql (form.flinkSql)">格式化</el-button>
       <el-button type="primary" size="small" class="sql-btn" @click="verifySql">语义校验</el-button>
     </div>
-    <div style="width: 70%;margin-left: 2%;float:left;border-top: solid 1px #d7d1d1;border-right:solid 1px #d7d1d1;">
+    <div style="width: 70%;margin-left: 2%;float:left;border-top: solid 1px #d7d1d1;border-right:solid 1px #d7d1d1;border-bottom:solid 1px #d7d1d1">
       <SqlEditor
         ref="sqleditor"
         style=""
@@ -15,7 +15,7 @@
         @changeTextarea="changeTextarea($event)"
       />
     </div>
-    <div style="width: 25%;float:left;">
+    <div style="width: 25%;float:right; margin-right: 3%;">
       <el-form ref="form" :rules="rules" :model="form" label-width="30%" style="border: solid 1px #d7d1d1;">
         <el-badge>运行参数</el-badge>
         <el-form-item label="容器策略">
@@ -132,6 +132,7 @@ export default {
         dingTokenId: '',
         emailAdd: ''
       },
+      startType: '',
       warnType: ['钉钉', '邮件'],
       containers: null,
       fv: null,
@@ -212,7 +213,8 @@ export default {
                 })
                 if (response.code === 200) {
                   const parm = {
-                    'jobName': this.form.jobName
+                    'jobName': this.form.jobName,
+                    'startType': 2
                   }
                   commitJob(parm).then(response => {
                     this.dialogFormVisible = false
@@ -234,13 +236,16 @@ export default {
     onSave() {
       this.$refs['form'].validate((valid) => {
         if (valid) {
-          createJob(this.form).then(() => {
-            this.dialogFormVisible = false
-            this.$notify({
-              title: 'Success',
-              message: 'Created Successfully',
-              type: 'success',
-              duration: 2000
+          verifySql(this.form).then(response => {
+            this.verifyForm.verifyInfo = response.content
+            createJob(this.form).then(() => {
+              this.dialogFormVisible = false
+              this.$notify({
+                title: 'Success',
+                message: 'Created Successfully',
+                type: 'success',
+                duration: 2000
+              })
             })
           })
         }

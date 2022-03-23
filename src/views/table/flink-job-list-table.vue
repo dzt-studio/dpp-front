@@ -91,7 +91,7 @@
           <el-button type="primary" size="mini" @click="row.jobType==='Flink Sql'?editUpdate(row):editJarUpdate(row)">
             编辑
           </el-button>
-          <el-button v-if="row.jobStatus!=='RUNNING' && row.appId!==null && row.jobStatus!=='BUILDING'" size="mini" @click="row.jobType==='Flink Sql'?jobStrat(row):jobCommitWithJar(row)">
+          <el-button v-if="row.jobStatus!=='RUNNING' && row.appId!==null && row.jobStatus!=='BUILDING'" size="mini" @click="startOp(row)">
             启动
           </el-button>
           <el-button v-if="row.jobStatus==='RUNNING'" size="mini" type="danger" @click="jobCancel(row)">
@@ -143,6 +143,30 @@
         </el-button>
       </div>
     </el-dialog>
+    <!-- 作业启动配置 -->
+    <el-dialog title="启动方式" :visible.sync="dialogFormStartOp" style="width: 60%;margin-left: 20%">
+      <el-form
+        ref="startOp"
+        :rules="rules"
+        :model="temp"
+        label-position="left"
+        label-width="70px"
+        style="margin-right:50px;margin-left:50px"
+      >
+        <v-form-render ref="vFormRef" :form-json="formJson" :form-data="formData" :option-data="optionData" />
+
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormStartOp = false">
+          取消
+        </el-button>
+        <el-button type="primary" @click="dialogStatus==='sql'?jobStrat(crow):jobCommitWithJar(crow)">
+          确认
+        </el-button>
+      </div>
+    </el-dialog>
+    <!-- 作业启动配置 -->
+
     <el-dialog title="日志" :visible.sync="dialogFormLog" style="width: 80%;margin-left: 15%">
       <el-form
         ref="logForm"
@@ -155,6 +179,7 @@
 </template>
 
 <script>
+
 import {
   jobList,
   jobFilter,
@@ -257,6 +282,9 @@ export default {
         jobName: null,
         jobStatus: null
       },
+      formJson: { 'widgetList': [{ 'type': 'radio', 'icon': 'radio-field', 'formItemFlag': true, 'options': { 'name': 'startType', 'label': 'radio', 'labelAlign': 'label-left-align', 'defaultValue': 1, 'columnWidth': '200px', 'size': '', 'displayStyle': 'block', 'buttonStyle': false, 'border': false, 'labelWidth': null, 'labelHidden': true, 'disabled': false, 'hidden': false, 'optionItems': [{ 'label': '无状态启动', 'value': 1 }, { 'label': '从最新的检查点启动', 'value': 2 }], 'required': false, 'requiredHint': '', 'validation': '', 'validationHint': '', 'customClass': [], 'labelIconClass': null, 'labelIconPosition': 'rear', 'labelTooltip': null, 'onCreated': '', 'onMounted': '', 'onChange': '', 'onValidate': '' }, 'id': 'radio88803' }], 'formConfig': { 'modelName': 'formData', 'refName': 'vForm', 'rulesName': 'rules', 'labelWidth': 80, 'labelPosition': 'left', 'size': '', 'labelAlign': 'label-left-align', 'cssCode': '', 'customClass': '', 'functions': '', 'layoutType': 'PC', 'onFormCreated': '', 'onFormMounted': '', 'onFormDataChange': '' }},
+      formData: {},
+      optionData: {},
       activeTab: 'sql',
       importanceOptions: ['RUNNING', 'FINISHED', 'FAILED'],
       // calendarTypeOptions,
@@ -268,11 +296,13 @@ export default {
         jobName: '',
         describes: ''
       },
+      crow: null,
       log: {
         logInfo: '正在获取日志...'
       },
       dialogFormLog: false,
       dialogFormVisible: false,
+      dialogFormStartOp: false,
       dialogStatus: 'sql',
       textMap: {
         update: 'Edit',
@@ -342,6 +372,20 @@ export default {
         this.$refs['dataForm'].clearValidate()
       })
     },
+    startOp(row) {
+      this.crow = row
+      this.resetTemp()
+      if (row.jobType === 'Flink Sql') {
+        this.dialogStatus = 'sql'
+      } else {
+        this.dialogStatus = 'jar'
+      }
+      this.temp.jobType = row.jobType
+      this.dialogFormStartOp = true
+      this.$nextTick(() => {
+        this.$refs['startOp'].clearValidate()
+      })
+    },
     handleCancel(row) {
       this.dialogStatus = 'cancel'
       this.dialogCancelVisible = true
@@ -378,19 +422,29 @@ export default {
       this.$router.push({ name: 'flink-jar-job-edit', params: { jobName: row.jobName }})
     },
     jobStrat(row) {
-      const parms = {
-        'jobName': row.jobName
-      }
-      commitJob(parms).then(response => {
-        this.getList()
+      this.$refs['vFormRef'].getFormData().then(formData => {
+        row.startType = formData.startType
+        const parms = {
+          'jobName': row.jobName,
+          'startType': row.startType
+        }
+        this.dialogFormStartOp = false
+        commitJob(parms).then(response => {
+          this.getList()
+        })
       })
     },
     jobCommitWithJar(row) {
-      const parms = {
-        'jobName': row.jobName
-      }
-      jobCommitWithJar(parms).then(response => {
-        this.getList()
+      this.$refs['vFormRef'].getFormData().then(formData => {
+        row.startType = formData.startType
+        const parms = {
+          'jobName': row.jobName,
+          'startType': row.startType
+        }
+        this.dialogFormStartOp = false
+        jobCommitWithJar(parms).then(response => {
+          this.getList()
+        })
       })
     },
     jobCancel(row) {

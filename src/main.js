@@ -28,11 +28,19 @@ if (process.env.NODE_ENV === 'production') {
   mockXHR()
 }
 
+import axios from 'axios'
+
+import VFormRender from 'vform-builds/dist/VFormRender.umd.min.js'
+// import VForm from 'vform-builds'
+import 'vform-builds/dist/VFormRender.css'
 // set ElementUI lang to EN
-Vue.use(ElementUI, { locale })
+Vue.use(ElementUI)
+// eslint-disable-next-line no-unused-vars
+// Vue.use(VForm)
+Vue.use(VFormRender)
 // 如果想要中文版 element-ui，按如下方式声明
 // Vue.use(ElementUI)
-
+window.axios = axios
 Vue.config.productionTip = false
 
 new Vue({

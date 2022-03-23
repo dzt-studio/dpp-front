@@ -103,7 +103,7 @@ export default {
     color: black;
     direction: ltr;
     line-height: 22px;
-    height: 650px;
+    height: 850px;
   }
   .CodeMirror-hints {
     z-index: 9999 !important;

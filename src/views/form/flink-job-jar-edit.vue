@@ -172,7 +172,8 @@ export default {
             })
             if (response.code === 200) {
               const parm = {
-                'jobName': this.form.jobName
+                'jobName': this.form.jobName,
+                'startType': 2
               }
               jobCommitWithJar(parm).then(response => {
                 this.dialogFormVisible = false
